@@ -17,7 +17,7 @@ class DepositController extends Controller
     }
 
 
-    public function depositBalance(Request $request, $seller_id) {
+    public function depositBalance($seller_id) {
 
         $data = array();
         //query to db
@@ -39,8 +39,7 @@ class DepositController extends Controller
         $data["seller_id"] = $seller_id;
         return response()->json([
             "message" => "success",
-            "data" => $data,
-            "method" => $method
+            "data" => $data
         ], 200);
 
     }
