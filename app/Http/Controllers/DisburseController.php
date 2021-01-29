@@ -42,7 +42,7 @@ class DisburseController extends Controller
         return $response;
 
     }
-    
+
     public function get_data ($url, $authorization) {
 
         $curl = curl_init();
@@ -77,7 +77,7 @@ class DisburseController extends Controller
         if (!empty($request->json('seller_id')) && !empty($request->json('amount')) && !empty($request->json('remark')) ) {
             $seller_id = $request->json('seller_id');
             $amount = $request->json('amount');
-            $remark = $request->json('remark'); 
+            $remark = $request->json('remark');
 
 
             $data["seller_id"] = $seller_id;
@@ -97,7 +97,7 @@ class DisburseController extends Controller
                     "data" => $data,
                 ], 404);
             }
-    
+
             $balance = $rd[0]->amount;
 
             if ($balance < $amount) {
@@ -122,7 +122,7 @@ class DisburseController extends Controller
                     "data" => $data,
                 ], 404);
             }
-    
+
 
             $datapush = array();
             $datapush["bank_code"] = $rs[0]->seller_bank_code;
@@ -131,9 +131,9 @@ class DisburseController extends Controller
             $datapush["remark"] = $remark;
 
             // panggil api disbursement
-            $auth = env('API_KEY').":".env('API_PASS'); 
+            $auth = env('API_KEY').":".env('API_PASS');
             $authorization = base64_encode($auth);
-          
+
             $jsondata = json_encode($datapush);
 
             $url = env('API_URL');
@@ -143,18 +143,16 @@ class DisburseController extends Controller
             $disb_return = json_decode($disb, true);
 
             $transaction_id = $disb_return["id"];
-  
+
 
             // tampilkan return error kalau gagal panggil api
             if ($transaction_id == "") {
                 // return bad request
                 return response()->json([
-                "status_code" => 500,   
+                "status_code" => 500,
                 "message" => "Error, please try again",
-                "data" => $data,
-                "result" => $disb,
-                "headers" => $headers    
-                ], 500); 
+                "data" => $data
+                ], 500);
             }
 
             $amount = $disb_return["amount"];
@@ -168,14 +166,14 @@ class DisburseController extends Controller
             $time_served = $disb_return["time_served"];
             $fee = $disb_return["fee"];
 
-           
-            
+
+
             //insert to table disbursement
             $sqli = "INSERT INTO tb_disbursement (disbursement_id, seller_id, amount, remark, transaction_id, `status`, `timestamp`, receipt, time_served, fee , created_by, updated_by) VALUES (uuid(), '$seller_id', $amount, '$remark', '$transaction_id', '$status', '$timestamp', '$receipt', '$time_served', '$fee' , 'admin', 'admin')";
             DB::insert($sqli);
 
 
-            ///insert to table log 
+            ///insert to table log
             $sqlilog = "INSERT INTO tb_transaction_log (log_id, transaction_id, amount, fee, remark, `status`, receipt, bank_code, account_number, beneficiary_name, time_served, `timestamp`, created_by) VALUES (uuid(), '$transaction_id', '$amount', '$fee', '$remark', '$status', '$receipt', '$bank_code', '$account_number', '$beneficiary_name', '$time_served', '$timestamp', 'admin') ";
 
             DB::insert($sqlilog);
@@ -183,19 +181,19 @@ class DisburseController extends Controller
         } else {
             // return bad request
             return response()->json([
-            "status_code" => 400,   
+            "status_code" => 400,
             "message" => "Bad Request",
             "data" => $data
-            ], 400); 
+            ], 400);
         }
-        
+
         return response()->json([
             "status_code" => 201,
             "message" => "Data created",
             "data"  => $data
         ], 201);
     }
-   
+
     public function disburseStatus($transaction_id) {
         $data = array();
         //query to db
@@ -217,9 +215,9 @@ class DisburseController extends Controller
 
         if ($laststatus == "PENDING") {
 
-            $auth = env('API_KEY').":".env('API_PASS'); 
+            $auth = env('API_KEY').":".env('API_PASS');
             $authorization = base64_encode($auth);
-            
+
             $url = env('API_URL')."disburse/".$transaction_id;
 
             $disb = $this->get_data($url, $authorization);
@@ -232,12 +230,12 @@ class DisburseController extends Controller
             if ($transaction_id == "") {
                 // return bad request
                 return response()->json([
-                "status_code" => 500,   
+                "status_code" => 500,
                 "message" => "Error, please try again",
                 "data" => $data,
                 "result" => $disb,
-                "headers" => $headers    
-                ], 500); 
+                "headers" => $headers
+                ], 500);
             }
 
             $amount = $disb_return["amount"];
@@ -259,7 +257,7 @@ class DisburseController extends Controller
                 $sqlilog = "INSERT INTO tb_transaction_log (log_id, transaction_id, amount, fee, remark, `status`, receipt, bank_code, account_number, beneficiary_name, time_served, `timestamp`, created_by) VALUES (uuid(), '$transaction_id', '$amount', '$fee', '$remark', '$status', '$receipt', '$bank_code', '$account_number', '$beneficiary_name', '$time_served', '$timestamp', 'admin') ";
                 DB::insert($sqlilog);
 
-                // cek apakah status sukses 
+                // cek apakah status sukses
                 if ($status == "SUCCESS") {
 
                     //ambil deposit seller
@@ -284,12 +282,12 @@ class DisburseController extends Controller
                     DB::update($sqlu);
                 }
 
-                //update data tabel disbursement 
+                //update data tabel disbursement
                 $sqlu = "UPDATE tb_disbursement SET `status`='$status', receipt='$receipt', time_served='$time_served', `timestamp`='$timestamp', updated_date=now(), updated_by='admin'  WHERE transaction_id=$transaction_id";
                 DB::update($sqlu);
-            }   
-        }    
-        //query data 
+            }
+        }
+        //query data
         $sqls = "SELECT transaction_id, amount, `status`, `timestamp`, remark, receipt, time_served, fee   FROM tb_disbursement where transaction_id=$transaction_id";
         $rs = DB::select($sqls);
 
@@ -300,7 +298,7 @@ class DisburseController extends Controller
         return response()->json([
             "message" => "success",
             "data" => $data,
-        ], 200);    
+        ], 200);
     }
 
     public function disburseLog($transaction_id) {
@@ -326,9 +324,9 @@ class DisburseController extends Controller
         return response()->json([
             "message" => "success",
             "data" => $data,
-        ], 200);    
+        ], 200);
 
-      
+
         return response()->json([
             "message" => "success",
             "data" => $data,
