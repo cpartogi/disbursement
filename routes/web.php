@@ -18,9 +18,9 @@ $router->get('/', function () use ($router) {
 });
 
 
-$router->get('/deposit/{seller_id}', 'DepositController@depositBalance');
+$router->get('/deposit/balance/{seller_id}', 'DepositController@depositBalance');
 
-$router->get('/deposit/log/{seller_id}', 'DepositController@depositLog');
+$router->get('/deposit/log', 'DepositController@depositLog');
 
 $router->post('/deposit/register', 'DepositController@depositRegister');
 
@@ -30,6 +30,6 @@ $router->post('/disburse/request', 'DisburseController@disburseSubmit');
 
 $router->get('/disburse/status/{transaction_id}', 'DisburseController@disburseStatus');
 
-$router->get('/disburse/log/{transaction_id}', 'DisburseController@disburseLog');
+$router->get('/disburse/log', 'DisburseController@disburseLog');
 
 ?>

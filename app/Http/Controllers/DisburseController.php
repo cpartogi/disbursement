@@ -70,6 +70,116 @@ class DisburseController extends Controller
     }
 
 
+     /**
+     * @OA\Post(
+     *     path="/disburse/request",
+     *     operationId="/disburse/request",
+     *     tags={"disburse"},
+     *     @OA\RequestBody(
+     *          @OA\JsonContent(
+     *              type="object",
+     *                  @OA\Property(property="seller_id", type="string"),
+     *                  @OA\Property(property="amount", type="integer"),
+     *                  @OA\Property(property="remark", type="string"),
+     *         )
+    *      ),
+     *     @OA\Response(
+     *         response="201",
+     *         description="Returns succes request disbursement",
+     *         @OA\JsonContent(
+     *           @OA\Property(
+     *              property="message",
+     *              type="string"
+     *            ),
+     *           @OA\Property(
+     *              property="status_code",
+     *              type="integer"
+     *            ),
+     *            @OA\Property(
+     *              property="data",
+     *              ref="#/components/schemas/requestdisburse"
+     *            )
+     *          )
+     *     ),
+     *     @OA\Response(
+     *         response="400",
+     *         description="Error: Bad Request",
+     *         @OA\JsonContent(
+     *           @OA\Property(
+     *              property="message",
+     *              type="string"
+     *            ),
+     *           @OA\Property(
+     *              property="status_code",
+     *              type="integer"
+     *            ),
+     *            @OA\Property(
+     *              property="data",
+     *              type="array",
+     *              @OA\Items(ref="#/components/schemas/emptyarray")
+     *            )
+     *          )
+     *     ),
+     *      @OA\Response(
+     *         response="404",
+     *         description="Error: Not Found",
+     *         @OA\JsonContent(
+     *           @OA\Property(
+     *              property="message",
+     *              type="string"
+     *            ),
+     *           @OA\Property(
+     *              property="status_code",
+     *              type="integer"
+     *            ),
+     *            @OA\Property(
+     *              property="data",
+     *              type="array",
+     *              @OA\Items(ref="#/components/schemas/requestdisburse")
+     *            )
+     *          )
+     *     ),
+     * @OA\Response(
+     *         response="500",
+     *         description="Error: Internal Server",
+     *         @OA\JsonContent(
+     *           @OA\Property(
+     *              property="message",
+     *              type="string"
+     *            ),
+     *           @OA\Property(
+     *              property="status_code",
+     *              type="integer"
+     *            ),
+     *            @OA\Property(
+     *              property="data",
+     *              type="array",
+     *              @OA\Items(ref="#/components/schemas/emptyarray")
+     *            )
+     *          )
+     *     ),
+     * )
+     */
+
+      /**
+     * @OA\Schema(
+     *   schema="requestdisburse",
+     *   @OA\Property(
+     *     property="seller_id",
+     *     type="string",
+     *   ),
+     *   @OA\Property(
+     *     property="amount",
+     *     type="integer",
+     *   ),
+     *   @OA\Property(
+     *     property="remark",
+     *     type="string",
+     *   )
+     * )
+     */
+
+
     public function disburseSubmit(Request $request) {
         $data = array();
 
@@ -93,7 +203,6 @@ class DisburseController extends Controller
                 return response()->json([
                     "message" => "Deposit data not found",
                     "status_code" => 404,
-                    "seller_id" => $seller_id,
                     "data" => $data,
                 ], 404);
             }
@@ -101,10 +210,10 @@ class DisburseController extends Controller
             $balance = $rd[0]->amount;
 
             if ($balance < $amount) {
+                $data = [];
                 return response()->json([
                     "message" => "Not Enough Balance",
                     "status_code" => 400,
-                    "seller_id" => $seller_id,
                     "data" => $data,
                 ], 400);
             }
@@ -118,7 +227,6 @@ class DisburseController extends Controller
                 return response()->json([
                     "message" => "Bank account data not found",
                     "status_code" => 404,
-                    "seller_id" => $seller_id,
                     "data" => $data,
                 ], 404);
             }
@@ -194,6 +302,117 @@ class DisburseController extends Controller
         ], 201);
     }
 
+
+    /**
+     * @OA\Get(
+     *     path="/disburse/status/{transaction_id}",
+     *     operationId="/disburse/status/transaction_id",
+     *     tags={"disburse"},
+     *     @OA\Parameter(
+     *         name="transaction_id",
+     *         in="path",
+     *         description="transaction id",
+     *         required=true,
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\Response(
+     *         response="200",
+     *         description="Returns transaction id status",
+     *         @OA\JsonContent(
+     *           @OA\Property(
+     *              property="message",
+     *              type="string"
+     *            ),
+     *           @OA\Property(
+     *              property="status_code",
+     *              type="integer"
+     *            ),
+     *            @OA\Property(
+     *              property="data",
+     *              type="array",
+     *               @OA\Items(ref="#/components/schemas/transactionstatus")
+     *            )
+     *          )
+     *     ),
+     *     @OA\Response(
+     *         response="404",
+     *         description="Error: Not Found",
+     *         @OA\JsonContent(
+     *           @OA\Property(
+     *              property="message",
+     *              type="string"
+     *            ),
+     *           @OA\Property(
+     *              property="status_code",
+     *              type="integer"
+     *            ),
+     *            @OA\Property(
+     *              property="data",
+     *              type="array",
+     *              @OA\Items(ref="#/components/schemas/emptyarray")
+     *            )
+     *          )
+     *     ),
+     *     @OA\Response(
+     *         response="500",
+     *         description="Error: Internal server error",
+     *         @OA\JsonContent(
+     *           @OA\Property(
+     *              property="message",
+     *              type="string"
+     *            ),
+     *           @OA\Property(
+     *              property="status_code",
+     *              type="integer"
+     *            ),
+     *            @OA\Property(
+     *              property="data",
+     *              type="array",
+     *              @OA\Items(ref="#/components/schemas/emptyarray")
+     *            )
+     *          )
+     *     ),
+     * )
+     */
+
+    /**
+     * @OA\Schema(
+     *   schema="transactionstatus",
+     *   @OA\Property(
+     *     property="transaction_id",
+     *     type="integer",
+     *   ),
+     *   @OA\Property(
+     *     property="amount",
+     *     type="integer",
+     *   ),
+     *    @OA\Property(
+     *     property="status",
+     *     type="string",
+     *   ),
+     *   @OA\Property(
+     *     property="timestamp",
+     *     type="string",
+     *   ),
+     *   @OA\Property(
+     *     property="remark",
+     *     type="string",
+     *   ),
+     *   @OA\Property(
+     *     property="receipt",
+     *     type="string",
+     *   ),
+     *   @OA\Property(
+     *     property="time_served",
+     *     type="string",
+     *   ),
+     *   @OA\Property(
+     *     property="fee",
+     *     type="integer",
+     *   )
+     * )
+     */
+
     public function disburseStatus($transaction_id) {
         $data = array();
         //query to db
@@ -233,8 +452,6 @@ class DisburseController extends Controller
                 "status_code" => 500,
                 "message" => "Error, please try again",
                 "data" => $data,
-                "result" => $disb,
-                "headers" => $headers
                 ], 500);
             }
 
@@ -297,15 +514,136 @@ class DisburseController extends Controller
 
         return response()->json([
             "message" => "success",
+            "status_code" => 200,
             "data" => $data,
         ], 200);
     }
 
-    public function disburseLog($transaction_id) {
+
+    /**
+     * @OA\Get(
+     *     path="/disburse/log",
+     *     operationId="/disburse/log",
+     *     tags={"disburse"},
+     *     @OA\Parameter(
+     *         name="transaction_id",
+     *         in="query",
+     *         description="Transaction id",
+     *         required=true,
+     *         @OA\Schema(type="integer")
+     *     ),
+     *   @OA\Parameter(ref="#/components/parameters/get_start_request_parameter"),
+     *   @OA\Parameter(ref="#/components/parameters/get_limit_request_parameter"),
+
+     *     @OA\Response(
+     *         response="200",
+     *         description="Returns transaction log",
+     *         @OA\JsonContent(
+     *           @OA\Property(
+     *              property="message",
+     *              type="string"
+     *            ),
+     *           @OA\Property(
+     *              property="status_code",
+     *              type="integer"
+     *            ),
+     *            @OA\Property(
+     *              property="data",
+     *              type="array",
+     *              @OA\Items(ref="#/components/schemas/transactionlog")
+     *            )
+     *          )
+     *     ),
+     *     @OA\Response(
+     *         response="404",
+     *         description="Error: Not Found",
+     *         @OA\JsonContent(
+     *           @OA\Property(
+     *              property="message",
+     *              type="string"
+     *            ),
+     *           @OA\Property(
+     *              property="status_code",
+     *              type="integer"
+     *            ),
+     *            @OA\Property(
+     *              property="data",
+     *              type="array",
+     *              @OA\Items(ref="#/components/schemas/emptyarray")
+     *            )
+     *          )
+     *     ),
+     * )
+     */
+
+    /**
+     * @OA\Schema(
+     *   schema="transactionlog",
+     *   @OA\Property(
+     *     property="log_id",
+     *     type="string",
+     *   ),
+     *   @OA\Property(
+     *     property="transaction_id",
+     *     type="integer",
+     *   ),
+     *   @OA\Property(
+     *     property="amount",
+     *     type="integer",
+     *   ),
+     *   @OA\Property(
+     *     property="fee",
+     *     type="integer",
+     *   ),
+     *   @OA\Property(
+     *     property="remark",
+     *     type="string",
+     *   ),
+     *   @OA\Property(
+     *     property="status",
+     *     type="string",
+     *   ),
+     *   @OA\Property(
+     *     property="receipt",
+     *     type="string",
+     *   ),
+     *  @OA\Property(
+     *     property="bank_code",
+     *     type="string",
+     *   ),
+     *  @OA\Property(
+     *     property="account_number",
+     *     type="string",
+     *   ),
+     *  @OA\Property(
+     *     property="beneficiary_name",
+     *     type="string",
+     *   ),
+     *   @OA\Property(
+     *     property="time_served",
+     *     type="string",
+     *   ),
+     *   @OA\Property(
+     *     property="timestamp",
+     *     type="string",
+     *   ),
+     *   @OA\Property(
+     *     property="created_date",
+     *     type="string",
+     *   ),
+     *
+     *
+     * )
+     */
+
+    public function disburseLog(Request $request) {
+        $transaction_id = $request->input("transaction_id");
+        $start = $request->input("start");
+        $limit = $request->input("limit");
         $data = array();
 
         //query to db
-        $sqls = "SELECT log_id, transaction_id, amount, fee, remark, `status`, receipt, bank_code, account_number, beneficiary_name, time_served, `timestamp`, created_date FROM tb_transaction_log WHERE transaction_id=$transaction_id ORDER BY created_date DESC";
+        $sqls = "SELECT log_id, transaction_id, amount, fee, remark, `status`, receipt, bank_code, account_number, beneficiary_name, time_served, `timestamp`, created_date FROM tb_transaction_log WHERE transaction_id=$transaction_id ORDER BY created_date DESC limit $start, $limit";
 
         $rs = DB::select($sqls);
 
@@ -320,12 +658,6 @@ class DisburseController extends Controller
         foreach ($rs as $rs_) {
             array_push($data, $rs_);
         }
-
-        return response()->json([
-            "message" => "success",
-            "data" => $data,
-        ], 200);
-
 
         return response()->json([
             "message" => "success",
